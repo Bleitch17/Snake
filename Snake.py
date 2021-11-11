@@ -2,7 +2,9 @@ import pygame
 
 
 class Tile:
-    def __init__(self, c, Images=['Black_Tile.png', 'Green_Tile.png'], x=0, y=0):
+    def __init__(self, c, Images=None, x=0, y=0):
+        if Images is None:
+            Images = ['resources/Black_Tile.png', 'resources/Green_Tile.png']
         self.color = c
 
         if self.color == "Black":
@@ -22,7 +24,7 @@ class Tile:
         self.color = c
 
         if Images is None:
-            Images = ['Black_Tile.png', 'Green_Tile.png']
+            Images = ['resources/Black_Tile.png', 'resources/Green_Tile.png']
 
         if self.color == "Black":
             self.image = Images[0]
@@ -46,7 +48,7 @@ class Game:
         self.screen_w = width
         self.screen_h = height
         self.size = (width, height)
-        self.logo = pygame.image.load("pythonImg1.png")
+        self.logo = pygame.image.load("resources/pythonImg1.png")
         pygame.display.set_icon(self.logo)
         pygame.display.set_caption("Snake")
 
