@@ -1,13 +1,13 @@
 import pygame
 
-from snake.Game import Game
+from game_objects.Game import Game
 
 
 def main():
     pygame.init()
 
-    MyApp = Game(750, 750)
-    MyApp.run()
+    game = Game(800)
+    game.run()
 
     pygame.quit()
 
