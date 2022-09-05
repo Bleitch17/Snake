@@ -3,7 +3,7 @@ import pygame
 from enum import Enum
 
 
-class Tile:
+class TileBase:
     class TileColors(Enum):
         BLACK = 0
         GREEN = 1
@@ -15,12 +15,9 @@ class Tile:
 
     TILE_WIDTH = 20
 
-    def __init__(self, tile_color, x_pos, y_pos):
-        self.x_pos = x_pos
-        self.y_pos = y_pos
-
-        self._tile = pygame.transform.scale(pygame.image.load(Tile.COLOR_IMAGE_MAP[tile_color]),
-                                            (Tile.TILE_WIDTH, Tile.TILE_WIDTH))
+    def __init__(self, tile_color):
+        self._tile = pygame.transform.scale(pygame.image.load(TileBase.COLOR_IMAGE_MAP[tile_color]),
+                                            (TileBase.TILE_WIDTH, TileBase.TILE_WIDTH))
 
     @property
     def tile(self):
