@@ -1,7 +1,9 @@
 import pygame
 
+from game_objects.Directions import Directions
 from game_objects.BackgroundTile import BackgroundTile
 from game_objects.Snake import Snake
+from game_objects.TurnMarker import TurnMarker
 
 
 class Game:
@@ -17,8 +19,8 @@ class Game:
         self.screen = pygame.display.set_mode(self.size)
 
         self.background_tiles = self.create_background()
-
         self.snake = Snake(100, 100)
+        self.turn_markers = []
 
         self.running = True
         self.clock = pygame.time.Clock()
@@ -34,19 +36,26 @@ class Game:
                 elif event.type == pygame.KEYUP:
                     match event.key:
                         case pygame.K_LEFT:
-                            self.snake.turn(Snake.Directions.LEFT)
+                            self.place_turn_marker(Directions.LEFT)
                         case pygame.K_RIGHT:
-                            self.snake.turn(Snake.Directions.RIGHT)
+                            self.place_turn_marker(Directions.RIGHT)
                         case pygame.K_UP:
-                            self.snake.turn(Snake.Directions.UP)
+                            self.place_turn_marker(Directions.UP)
                         case pygame.K_DOWN:
-                            self.snake.turn(Snake.Directions.DOWN)
+                            self.place_turn_marker(Directions.DOWN)
                         case pygame.K_ESCAPE:
                             self.running = False
 
             # ALL EVENT PROCESSING GOES ABOVE
 
             # ALL GAME LOGIC GOES BELOW
+
+            for turn_marker in self.turn_markers[::-1]:
+                if turn_marker.is_position_equal_to_other_position(self.snake.get_head_position()):
+                    self.snake.set_head_direction(turn_marker.get_turn_direction())
+                    turn_marker.decrement_remaining_turns()
+                    if turn_marker.get_remaining_turns() == 0:
+                        self.turn_markers.remove(turn_marker)  # TODO: confirm this is safe
 
             self.snake.update_pos()
 
@@ -63,6 +72,31 @@ class Game:
             # ALL CODE TO DRAW GOES ABOVE
 
             self.clock.tick(Game.FRAMES_PER_SECOND)
+
+    def place_turn_marker(self, turn_direction):
+        snake_position = self.snake.get_head_position()
+        snake_direction = self.snake.get_head_direction()
+
+        if turn_direction in Snake.allowed_next_turn_directions[snake_direction]:
+            turn_marker = TurnMarker(snake_position[0], snake_position[1], snake_direction, turn_direction,
+                                     self.snake.get_length())
+            self.add_turn_marker(turn_marker)
+
+    def add_turn_marker(self, new_turn_marker):
+        if len(self.turn_markers) == 0:
+            self.turn_markers.append(new_turn_marker)
+        else:
+            existing_marker_index = self.get_index_of_marker_by_position(new_turn_marker.get_position())
+            if existing_marker_index >= 0:
+                self.turn_markers[existing_marker_index].set_turn_direction(new_turn_marker.get_turn_direction())
+            else:
+                self.turn_markers.append(new_turn_marker)
+
+    def get_index_of_marker_by_position(self, position):
+        for i in range(len(self.turn_markers)):
+            if self.turn_markers[i].is_position_equal_to_other_position(position):
+                return i
+        return -1
 
     def create_background(self):
         background_tiles = []
