@@ -8,6 +8,10 @@ from game_objects.TurnMarker import TurnMarker
 
 class Game:
     FRAMES_PER_SECOND = 60
+    SNAKE_SPEED = 2
+    SNAKE_INITIAL_X = 100
+    SNAKE_INITIAL_Y = 100
+    SNAKE_INITIAL_DIRECTION = Directions.RIGHT
 
     def __init__(self, width):
         self.screen_w = width
@@ -19,7 +23,7 @@ class Game:
         self.screen = pygame.display.set_mode(self.size)
 
         self.background_tiles = self.create_background()
-        self.snake = Snake(100, 100)
+        self.snake = Snake(Game.SNAKE_SPEED, Game.SNAKE_INITIAL_DIRECTION, Game.SNAKE_INITIAL_X, Game.SNAKE_INITIAL_Y)
         self.turn_markers = []
 
         self.running = True
@@ -50,12 +54,13 @@ class Game:
 
             # ALL GAME LOGIC GOES BELOW
 
+            # TODO: confirm this is safe with body longer than just head
             for turn_marker in self.turn_markers[::-1]:
                 if turn_marker.is_position_equal_to_other_position(self.snake.get_head_position()):
                     self.snake.set_head_direction(turn_marker.get_turn_direction())
                     turn_marker.decrement_remaining_turns()
                     if turn_marker.get_remaining_turns() == 0:
-                        self.turn_markers.remove(turn_marker)  # TODO: confirm this is safe
+                        self.turn_markers.remove(turn_marker)
 
             self.snake.update_pos()
 
@@ -103,8 +108,7 @@ class Game:
         for x in range(int(self.screen_w / BackgroundTile.TILE_WIDTH)):
             for y in range(int(self.screen_w / BackgroundTile.TILE_WIDTH)):
                 background_tiles.append(
-                    BackgroundTile(BackgroundTile.TileColors.BLACK, x_pos=x * BackgroundTile.TILE_WIDTH,
-                                   y_pos=y * BackgroundTile.TILE_WIDTH))
+                    BackgroundTile(x * BackgroundTile.TILE_WIDTH, y * BackgroundTile.TILE_WIDTH))
         return background_tiles
 
     def draw_background(self):

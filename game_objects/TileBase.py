@@ -18,7 +18,3 @@ class TileBase:
     def __init__(self, tile_color):
         self._tile = pygame.transform.scale(pygame.image.load(TileBase.COLOR_IMAGE_MAP[tile_color]),
                                             (TileBase.TILE_WIDTH, TileBase.TILE_WIDTH))
-
-    @property
-    def tile(self):
-        return self._tile
