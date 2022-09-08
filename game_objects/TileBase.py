@@ -7,10 +7,12 @@ class TileBase:
     class TileColors(Enum):
         BLACK = 0
         GREEN = 1
+        RED = 2
 
     COLOR_IMAGE_MAP = {
         TileColors.BLACK: './resources/Black_Tile.png',
-        TileColors.GREEN: './resources/Green_Tile.png'
+        TileColors.GREEN: './resources/Green_Tile.png',
+        TileColors.RED:   './resources/apple.png'
     }
 
     TILE_WIDTH = 20

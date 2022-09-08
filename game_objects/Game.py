@@ -24,7 +24,7 @@ class Game:
 
         self.background_tiles = self.create_background()
         self.snake = Snake(Game.SNAKE_SPEED, Game.SNAKE_INITIAL_DIRECTION, Game.SNAKE_INITIAL_X, Game.SNAKE_INITIAL_Y)
-        self.turn_markers = []
+        self.turn_markers: list[TurnMarker] = []
 
         self.running = True
         self.clock = pygame.time.Clock()
@@ -56,11 +56,9 @@ class Game:
 
             # TODO: confirm this is safe with body longer than just head
             for turn_marker in self.turn_markers[::-1]:
-                if turn_marker.is_position_equal_to_other_position(self.snake.get_head_position()):
-                    self.snake.set_head_direction(turn_marker.get_turn_direction())
-                    turn_marker.decrement_remaining_turns()
-                    if turn_marker.get_remaining_turns() == 0:
-                        self.turn_markers.remove(turn_marker)
+                self.snake.process_turn_marker(turn_marker)
+                if turn_marker.get_remaining_turns() == 0:
+                    self.turn_markers.remove(turn_marker)
 
             self.snake.update_pos()
 

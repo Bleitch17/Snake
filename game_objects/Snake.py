@@ -1,5 +1,13 @@
 from game_objects.BodyTile import BodyTile
 from game_objects.Directions import Directions
+from game_objects.TurnMarker import TurnMarker
+
+
+def attempt_to_turn_body_segment_if_at_turn_marker(turn_marker: TurnMarker, body_segment: BodyTile):
+    if turn_marker.is_position_equal_to_other_position(body_segment.get_position()) and \
+            turn_marker.get_remaining_turns() > 0:
+        body_segment.set_direction(turn_marker.get_turn_direction())
+        turn_marker.decrement_remaining_turns()
 
 
 class Snake:
@@ -26,6 +34,14 @@ class Snake:
 
     def get_length(self):
         return self.length
+
+    def get_tail(self):
+        return self.tail
+
+    def process_turn_marker(self, turn_marker: TurnMarker):
+        attempt_to_turn_body_segment_if_at_turn_marker(turn_marker, self.head)
+        for tail_segment in self.tail:
+            attempt_to_turn_body_segment_if_at_turn_marker(turn_marker, tail_segment)
 
     def update_pos(self):
         self.head.update_pos()

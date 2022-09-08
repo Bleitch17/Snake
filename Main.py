@@ -6,7 +6,7 @@ from game_objects.Game import Game
 def main():
     pygame.init()
 
-    game = Game(800)
+    game = Game(600)
     game.run()
 
     pygame.quit()
