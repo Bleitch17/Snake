@@ -1,62 +1,72 @@
 from game_objects.BodyTile import BodyTile
 from game_objects.Directions import Directions
-from game_objects.TurnMarker import TurnMarker
+from game_objects.Turn import Turn
+from game_settings.GameSettings import SNAKE_INITIAL_X, SNAKE_INITIAL_Y
 
 
-def attempt_to_turn_body_segment_if_at_turn_marker(turn_marker: TurnMarker, body_segment: BodyTile):
-    if turn_marker.is_position_equal_to_other_position(body_segment.get_position()) and \
-            turn_marker.get_remaining_turns() > 0:
-        body_segment.set_direction(turn_marker.get_turn_direction())
-        turn_marker.decrement_remaining_turns()
+INITIAL_LENGTH = 3
+
+VALID_NEXT_TURN_DIRECTIONS = {
+    Directions.LEFT: [Directions.UP, Directions.DOWN],
+    Directions.RIGHT: [Directions.UP, Directions.DOWN],
+    Directions.UP: [Directions.LEFT, Directions.RIGHT],
+    Directions.DOWN: [Directions.LEFT, Directions.RIGHT]
+}
+
+
+def create_body(x, y, direction, speed):
+    return [BodyTile(x - (i * BodyTile.TILE_WIDTH), y, direction, speed) for i in range(INITIAL_LENGTH)]
 
 
 class Snake:
-    allowed_next_turn_directions = {
-        Directions.LEFT: [Directions.UP, Directions.DOWN],
-        Directions.RIGHT: [Directions.UP, Directions.DOWN],
-        Directions.UP: [Directions.LEFT, Directions.RIGHT],
-        Directions.DOWN: [Directions.LEFT, Directions.RIGHT]
-    }
-
-    def __init__(self, speed, direction, x=100, y=100):
-        self.head = BodyTile(x, y, direction, speed)
-        self.length = 3
-        self.tail = self.create_tail(self.length, speed)
-
-    def get_head_position(self):
-        return self.head.get_position()
-
-    def get_head_direction(self):
-        return self.head.get_direction()
-
-    def set_head_direction(self, direction):
-        self.head.set_direction(direction)
-
-    def get_length(self):
-        return self.length
-
-    def get_tail(self):
-        return self.tail
-
-    def process_turn_marker(self, turn_marker: TurnMarker):
-        attempt_to_turn_body_segment_if_at_turn_marker(turn_marker, self.head)
-        for tail_segment in self.tail:
-            attempt_to_turn_body_segment_if_at_turn_marker(turn_marker, tail_segment)
+    def __init__(self, speed, direction, x=SNAKE_INITIAL_X, y=SNAKE_INITIAL_Y):
+        self._body = create_body(x, y, direction, speed)
 
     def update_pos(self):
-        self.head.update_pos()
-        for tail_segment in self.tail:
-            tail_segment.update_pos()
+        for body_segment in self._body:
+            body_segment.update_pos()
+
+    def process_turns(self):
+        # Only process turns for the body segments that have them
+        segment_with_turn_index = -1
+        for i in range(len(self._body)):
+            if self._body[i].has_scheduled_turn():
+                segment_with_turn_index = i
+                break
+
+        if segment_with_turn_index < 0:
+            return
+
+        for i in range(segment_with_turn_index, len(self._body)):
+            self._body[i].process_next_turn()
+
+    def schedule_turn(self, direction):
+        if self._body[0].has_scheduled_turn():
+            # TODO: Schedule turns in advance for smoother controls
+            return
+
+        current_head_direction = self._body[0].get_direction()
+        if direction not in VALID_NEXT_TURN_DIRECTIONS[current_head_direction]:
+            return
+
+        current_head_position = self._body[0].get_position()
+
+        next_turn_x = (current_head_position[0] // BodyTile.TILE_WIDTH) * BodyTile.TILE_WIDTH
+        next_turn_y = (current_head_position[1] // BodyTile.TILE_WIDTH) * BodyTile.TILE_WIDTH
+
+        match current_head_direction:
+            case Directions.LEFT:
+                next_turn_x -= BodyTile.TILE_WIDTH
+            case Directions.RIGHT:
+                next_turn_x += BodyTile.TILE_WIDTH
+            case Directions.UP:
+                next_turn_y -= BodyTile.TILE_WIDTH
+            case Directions.DOWN:
+                next_turn_y += BodyTile.TILE_WIDTH
+
+        for body_segment in self._body:
+            body_segment.schedule_turn(Turn(next_turn_x, next_turn_y, direction))
 
     def draw(self, screen):
-        self.head.draw(screen)
-        for tail_segment in self.tail:
-            tail_segment.draw(screen)
-
-    def create_tail(self, body_length, speed):
-        body = []
-        initial_head_position = self.head.get_position()
-        for i in range(1, body_length):
-            body.append(BodyTile(initial_head_position[0] - (i * BodyTile.TILE_WIDTH), initial_head_position[1],
-                                 self.head.get_direction(), speed))
-        return body
+        for body_segment in self._body:
+            body_segment.draw(screen)

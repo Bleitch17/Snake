@@ -1,2 +1,4 @@
 game_objects/__pycache__
+game_settings/__pycache__
+.idea/*
 venv

@@ -1,0 +1,8 @@
+from game_objects.Directions import Directions
+
+WIDTH = 600
+FRAMES_PER_SECOND = 60
+SNAKE_SPEED = 2
+SNAKE_INITIAL_X = 100
+SNAKE_INITIAL_Y = 100
+SNAKE_INITIAL_DIRECTION = Directions.RIGHT
