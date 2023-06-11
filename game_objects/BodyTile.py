@@ -14,8 +14,19 @@ class BodyTile(TileBase):
         self._speed = speed
         self._scheduled_turns = deque()
 
-    def __deepcopy__(self):
-        new_body_tile = BodyTile(self._x_pos, self._y_pos, self._direction, self._speed)
+    def clone_and_shift(self):
+        new_body_tile_x, new_body_tile_y = self._x_pos, self._y_pos
+        match self._direction:
+            case Directions.UP:
+                new_body_tile_y += TileBase.TILE_WIDTH
+            case Directions.DOWN:
+                new_body_tile_y -= TileBase.TILE_WIDTH
+            case Directions.LEFT:
+                new_body_tile_x += TileBase.TILE_WIDTH
+            case Directions.RIGHT:
+                new_body_tile_x -= TileBase.TILE_WIDTH
+
+        new_body_tile = BodyTile(new_body_tile_x, new_body_tile_y, self._direction, self._speed)
         new_body_tile._scheduled_turns = copy.deepcopy(self._scheduled_turns)
         return new_body_tile
 
@@ -24,6 +35,9 @@ class BodyTile(TileBase):
 
     def get_direction(self):
         return self._direction
+
+    def get_last_turn(self):
+        return self._scheduled_turns[-1]
 
     def has_scheduled_turn(self):
         return len(self._scheduled_turns) > 0
